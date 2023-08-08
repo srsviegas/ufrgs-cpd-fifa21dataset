@@ -1,5 +1,5 @@
-#ifndef ARIA_CSV_H
-#define ARIA_CSV_H
+#ifndef CSV_PARSER_H
+#define CSV_PARSER_H
 
 #include <fstream>
 #include <memory>

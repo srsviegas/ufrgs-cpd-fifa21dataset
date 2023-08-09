@@ -1,12 +1,11 @@
 #ifndef TRIE_H
 #define TRIE_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <cctype>
 #include "parser.h"
-
-#include <iostream>
 
 #define ALPHABET_SIZE 26 + 5  // 26 letters plus 5 special characters
 
@@ -95,6 +94,11 @@ public:
         return id_vector;
     }
 
+    /**
+     * Populates the PlayerNameTrie by reading and parsing data from a CSV file.
+     *
+     * @param csv_filename The path to the CSV file containing the FIFA players data.
+     */
     void from_csv(std::string csv_filename) {
         std::ifstream csv_file(csv_filename);
         if (!csv_file) {

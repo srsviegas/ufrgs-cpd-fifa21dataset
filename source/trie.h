@@ -21,10 +21,10 @@ private:
      * @param id_vector The vector to store gathered IDs.
      */
     void gather_ids(std::vector<uint32_t>& id_vector) {
-        if (!this->player_ids.empty()) {
+        if (!(this->player_ids.empty())) {
             // Concatenate both vectors
-            player_ids.insert(
-                player_ids.end(), this->player_ids.begin(), this->player_ids.end()
+            id_vector.insert(
+                id_vector.end(), this->player_ids.begin(), this->player_ids.end()
             );
         }
         for (int i = 0; i < ALPHABET_SIZE; i++) {
@@ -117,7 +117,6 @@ public:
                 }
                 column++;
             }
-
             this->insert(player_name, player_id);
         }
     }

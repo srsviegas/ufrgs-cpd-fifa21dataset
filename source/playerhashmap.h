@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <string>
 #include "parser.h"
 #include "hashmap.h"
 
@@ -22,7 +24,7 @@ struct Player {
 class PlayerHashMap : public HashMap<Player> {
 private:
     std::vector<std::string> format_positions(std::string s) {
-        std::vector<std::string> result;
+        std::vector<std::string> positions;
         std::stringstream ss(s);
         std::string token;
 
@@ -32,10 +34,14 @@ private:
         }
 
         while (std::getline(ss, token, ',')) {
-            result.push_back(token);
+            // Remove leading space
+            if (token[0] == ' ') {
+                token.erase(token.begin());
+            }
+            positions.push_back(token);
         }
 
-        return result;
+        return positions;
     }
 
 public:
@@ -64,7 +70,7 @@ public:
                 switch (column) {
                 case 0: player.id = stoull(field, nullptr, 10); break;
                 case 1: player.name = field; break;
-                case 3: player.positions = format_positions(field); break;
+                case 2: player.positions = format_positions(field); break;
                 }
                 column++;
             }

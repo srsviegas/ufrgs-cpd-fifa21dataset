@@ -67,9 +67,14 @@ void start_console(PlayerNameTrie player_names, PlayerHashMap players) {
         std::cout << "$ ";
         std::getline(std::cin, input);
 
-        // placeholder
+        // placeholder (search players by prefix)
         for (auto& id : player_names.search(input)) {
-            std::cout << players.search(id)->name << std::endl;
+            Player player = *(players.search(id));
+            std::cout << player.id << "," << player.name << ",";
+            for (auto& position : player.positions) {
+                std::cout << position << " ";
+            }
+            std::cout << std::endl;
         }
     }
 }

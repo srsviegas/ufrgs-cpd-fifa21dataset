@@ -3,12 +3,11 @@
 
 #include <string>
 #include <vector>
-#include "parser.h"
 
 template <class T>
 class HashMap {
 private:
-    int table_size;
+    uint16_t table_size;
 
     /**
      * Calculates a hash value for the given key.
@@ -17,7 +16,7 @@ private:
      * @return The calculated hash value (16-bit uint).
      */
     uint16_t hash(uint32_t key) {
-        return key % this->table_size;
+        return key % table_size;
     }
 
 public:
@@ -26,11 +25,11 @@ public:
     /**
      * Constructs a HashMap instance with a specified table size.
      *
-     * @param table_size The initial size of the hash table.
+     * @param tsize The initial size of the hash table.
      */
-    HashMap(int table_size) {
-        this->table_size = table_size;
-        this->table = new std::vector<T>[table_size];
+    HashMap(uint16_t tsize) {
+        table_size = tsize;
+        table = new std::vector<T>[table_size];
     }
 
     /**
@@ -40,8 +39,8 @@ public:
      * @param item The item to insert into the hash map.
      */
     void insert(uint32_t key, T item) {
-        int hash = this->hash(key);
-        this->table[hash].push_back(item);
+        uint16_t hash_value = hash(key);
+        table[hash_value].push_back(item);
     }
 
     /**
@@ -50,9 +49,9 @@ public:
      * @param key The key associated with the item to search for.
      * @return A pointer to the found item, or nullptr if not found.
      */
-    T* search(int key) {
-        int hash = this->hash(key);
-        for (auto& item : this->table[hash]) {
+    T* search(uint32_t key) {
+        uint16_t hash_value = hash(key);
+        for (auto& item : table[hash_value]) {
             if (item == key) {
                 return &item;
             }

@@ -112,7 +112,7 @@ public:
         for (auto& row : parser) {
             std::string player_name;
             uint32_t player_id;
-            int column = 0;
+            uint8_t column = 0;
 
             for (auto& field : row) {
                 switch (column) {

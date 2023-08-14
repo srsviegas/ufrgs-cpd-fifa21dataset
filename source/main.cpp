@@ -38,19 +38,19 @@ void build_structures(
 
     clock_t start = clock();
 
-    player_names.from_csv("../data/players.csv");
+    player_names.from_csv("data/players.csv");
     clock_t end_trie = clock();
     std::cout << "[-] Player Names Trie initialization completed in "
         << double(end_trie - start) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
 
-    players.from_csv("../data/players.csv");
+    players.from_csv("data/players.csv");
     clock_t end_phash = clock();
     std::cout << "[-] Player Hash Map initialization completed in "
         << double(end_phash - end_trie) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
 
-    tags.from_csv("../data/tags.csv");
+    tags.from_csv("data/tags.csv");
     clock_t end_thash = clock();
     std::cout << "[-] Tag Hash Map initialization completed in "
         << double(end_thash - end_phash) / double(CLOCKS_PER_SEC)

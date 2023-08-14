@@ -4,20 +4,14 @@
 #include <string>
 #include <vector>
 
-template <class T>
+template <class T, class U = uint32_t>
 class HashMap {
-private:
+protected:
     uint16_t table_size;
 
-    /**
-     * Calculates a hash value for the given key.
-     *
-     * @param key The key for which to calculate the hash value (32-bit uint).
-     * @return The calculated hash value (16-bit uint).
-     */
-    uint16_t hash(uint32_t key) {
-        return key % table_size;
-    }
+private:
+    virtual uint16_t hash(U key) = 0;
+    virtual bool equal(T item, U key) = 0;
 
 public:
     std::vector<T>* table;
@@ -38,7 +32,7 @@ public:
      * @param key The key associated with the item (32-bit uint).
      * @param item The item to insert into the hash map.
      */
-    void insert(uint32_t key, T item) {
+    void insert(U key, T item) {
         uint16_t hash_value = hash(key);
         table[hash_value].push_back(item);
     }
@@ -49,10 +43,10 @@ public:
      * @param key The key associated with the item to search for.
      * @return A pointer to the found item, or nullptr if not found.
      */
-    T* search(uint32_t key) {
+    T* search(U key) {
         uint16_t hash_value = hash(key);
         for (auto& item : table[hash_value]) {
-            if (item == key) {
+            if (equal(item, key)) {
                 return &item;
             }
         }

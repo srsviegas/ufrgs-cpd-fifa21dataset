@@ -14,15 +14,21 @@ struct Player {
     std::vector<std::string> positions;
     uint64_t rating_sum;
     uint32_t rating_count;
-
-    bool operator==(const uint32_t other_id) const {
-        return id == other_id;
-    }
 };
 
 
 class PlayerHashMap : public HashMap<Player> {
 private:
+    /**
+     * Calculates a hash value for the given key.
+     *
+     * @param key The key for which to calculate the hash value (32-bit uint).
+     * @return The calculated hash value (16-bit uint).
+     */
+    uint16_t hash(uint32_t key) {
+        return key % table_size;
+    }
+
     std::vector<std::string> format_positions(std::string s) {
         std::vector<std::string> positions;
         std::stringstream ss(s);
@@ -44,11 +50,15 @@ private:
         return positions;
     }
 
+    bool equal(Player item, uint32_t key) {
+        return item.id == key;
+    }
+
 public:
     using HashMap<Player>::HashMap;
 
     /**
-     * Populates the PlayerNameTrie by reading and parsing data from a CSV file.
+     * Populates the PlayerHashMap by reading and parsing data from a CSV file.
      *
      * @param csv_filename The path to the CSV file containing the FIFA players data.
      */

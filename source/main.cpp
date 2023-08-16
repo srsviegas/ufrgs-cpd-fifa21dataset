@@ -1,5 +1,6 @@
 #include <iostream>
 #include <time.h>
+#include <sstream>
 #include "parser.h"
 #include "trie.h"
 #include "hashmap.h"
@@ -8,7 +9,7 @@
 
 void build_structures(PlayerNameTrie& player_names, PlayerHashMap& players, TagHashMap& tags);
 void start_console(PlayerNameTrie player_names, PlayerHashMap players, TagHashMap tags);
-
+std::string parse_command(std::string line, std::vector<std::string>& arguments);
 
 int main() {
     PlayerNameTrie player_names;
@@ -84,18 +85,60 @@ void start_console(
         << "================================================================\n";
 
     while (true) {
-        std::string input;
-        std::cout << "$ ";
-        std::getline(std::cin, input);
+        std::string command;
+        std::vector<std::string> arguments;
 
-        // placeholder (search players by prefix)
-        for (auto& id : player_names.search(input)) {
-            Player player = *(players.search(id));
-            std::cout << player.id << "," << player.name << ",";
-            for (auto& position : player.positions) {
-                std::cout << position << " ";
+        std::cout << "$ ";
+        std::getline(std::cin, command);
+        command = parse_command(command, arguments);
+
+        if (command == "player") {
+            for (auto& id : player_names.search(arguments[0])) {
+                Player player = *(players.search(id));
+                std::cout << player.id << "," << player.name << ",";
+                for (auto& position : player.positions) {
+                    std::cout << position << " ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
+        }
+        else if (command == "tag") {
+            for (auto& id : tags.search_tags(arguments)) {
+                Player player = *(players.search(id));
+                std::cout << player.id << "," << player.name << ",";
+                for (auto& position : player.positions) {
+                    std::cout << position << " ";
+                }
+                std::cout << std::endl;
+            }
         }
     }
+}
+
+/**
+ * Parses a command line and extracts the command and its arguments.
+ *
+ * @param line The command line input to be parsed.
+ * @param arguments A reference to a vector where the parsed arguments will be stored.
+ * @return The extracted command from the command line.
+ */
+std::string parse_command(std::string line, std::vector<std::string>& arguments) {
+    std::string command;
+    std::stringstream ss(line);
+
+    std::getline(ss, command, ' ');
+    if (command.back() == ' ') {
+        // Remove trailing space
+        command.pop_back();
+    }
+
+    std::string argument;
+    while (std::getline(ss, argument, '"')) {
+        // Ignore if argument is empty
+        if (argument != "" && argument != " ") {
+            arguments.push_back(argument);
+        }
+    }
+
+    return command;
 }

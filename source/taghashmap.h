@@ -11,7 +11,7 @@
 
 struct TagVector {
     std::string name;
-    std::vector<uint32_t> vec;
+    std::vector<uint32_t> vector;
 };
 
 class TagHashMap : public HashMap<TagVector, std::string> {
@@ -47,23 +47,73 @@ public:
     void insert_player_to_tag(uint32_t player_id, std::string tag) {
         TagVector* item_ptr = search(tag);
         if (!item_ptr) {
+            // Tag vector was still not initialized
             TagVector item;
             item.name = tag;
-            item.vec = { player_id };
+            item.vector = { player_id };
             insert(tag, item);
             return;
         }
         int i = 0;
-        for (auto& stored_id : item_ptr->vec) {
+        for (auto& stored_id : item_ptr->vector) {
             if (stored_id == player_id) {
+                // Player ID already inside tag vector
                 return;
             }
             else if (stored_id > player_id) {
+                // Correct position for player ID found
                 break;
             }
             i++;
         }
-        item_ptr->vec.insert(item_ptr->vec.begin() + i, player_id);
+        item_ptr->vector.insert(item_ptr->vector.begin() + i, player_id);
+    }
+
+    /**
+     * Searches for the intersection of player IDs based on provided tags.
+     *
+     * @note It is expected that the tag vectors are in ascending order.
+     * @param tags A vector of strings representing the tags to search for.
+     * @return A vector of uint32_t containing the common player IDs.
+     */
+    std::vector<uint32_t> search_tags(std::vector<std::string> tags) {
+        std::vector<uint32_t> intersection;
+        std::vector<std::vector<uint32_t>> vectors;
+        std::vector<uint16_t> indexes(tags.size(), 0);
+
+        // Find all tag vectors
+        size_t i = 0;
+        for (auto& tag : tags) {
+            try {
+                vectors.push_back(search(tag)->vector);
+            }
+            catch (...) {
+                // If a tag is not found, return an empty vector
+                return std::vector<uint32_t>();
+            }
+            i++;
+        }
+
+        // Find intersection of the tag vectors
+        for (auto& player : vectors[0]) {
+            bool present_in_all = true;
+            for (i = 1; i < indexes.size(); i++) {
+                while (vectors[i][indexes[i]] < player) {
+                    indexes[i]++;
+                    if (indexes[i] >= vectors[i].size()) {
+                        return intersection;
+                    }
+                }
+                if (vectors[i][indexes[i]] != player) {
+                    present_in_all = false;
+                }
+            }
+            if (present_in_all) {
+                intersection.push_back(player);
+            }
+        }
+
+        return intersection;
     }
 
     /**

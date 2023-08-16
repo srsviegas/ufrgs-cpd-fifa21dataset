@@ -12,8 +12,8 @@ void start_console(PlayerNameTrie player_names, PlayerHashMap players, TagHashMa
 
 int main() {
     PlayerNameTrie player_names;
-    PlayerHashMap players(1000);
-    TagHashMap tags(1000);
+    PlayerHashMap players(12007);
+    TagHashMap tags(809);
 
     build_structures(player_names, players, tags);
     start_console(player_names, players, tags);
@@ -49,12 +49,16 @@ void build_structures(
     std::cout << "[-] Player Hash Map initialization completed in "
         << double(end_phash - end_trie) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
+    std::cout << "    Occupancy rate of " << players.get_occupancy() * 100
+        << "%." << std::endl;
 
     tags.from_csv("data/tags.csv");
     clock_t end_thash = clock();
     std::cout << "[-] Tag Hash Map initialization completed in "
         << double(end_thash - end_phash) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
+    std::cout << "    Occupancy rate of " << tags.get_occupancy() * 100
+        << "%." << std::endl;
 
     std::cout << "[-] Total time elapsed: "
         << double(clock() - start) / double(CLOCKS_PER_SEC)

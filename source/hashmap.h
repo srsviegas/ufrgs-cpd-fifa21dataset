@@ -52,6 +52,16 @@ public:
         }
         return nullptr;
     }
+
+    float get_occupancy() {
+        int occupied = 0;
+        for (int i = 0; i < table_size; i++) {
+            if (!(table[i].empty())) {
+                occupied++;
+            }
+        }
+        return static_cast<float>(occupied) / table_size;
+    }
 };
 
 #endif // HASH_H

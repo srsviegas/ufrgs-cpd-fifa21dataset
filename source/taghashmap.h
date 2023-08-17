@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "parser.h"
+#include "csv.h"
 #include "hashmap.h"
 
 #define PRIME 31
@@ -22,10 +22,10 @@ private:
      * @param key The key for which to calculate the hash value (string : tag).
      * @return The calculated hash value (16-bit uint).
      */
-    uint16_t hash(std::string key) {
-        uint16_t hash_key = 0;
+    uint32_t hash(std::string key) {
+        uint32_t hash_key = 0;
         for (char& c : key) {
-            int i = static_cast<int>(c);
+            uint32_t i = static_cast<uint32_t>(c);
             hash_key = (PRIME * hash_key + i) % table_size;
         }
         return hash_key;
@@ -122,27 +122,13 @@ public:
      * @param csv_filename The path to the CSV file containing the players tag data.
      */
     void from_csv(std::string csv_filename) {
-        std::ifstream csv_file(csv_filename);
-        if (!csv_file) {
-            std::cout << "[X] file " << csv_filename
-                << " was not loaded." << std::endl;
-        }
-        csv_file.ignore(50, '\n');  // ignore header
+        io::CSVReader<2> in(csv_filename);
+        uint32_t player_id;
+        std::string tag;
 
-        csv::CsvParser parser(csv_file);
+        in.read_header(io::ignore_extra_column, "sofifa_id", "tag");
 
-        for (auto& row : parser) {
-            uint32_t player_id;
-            std::string tag;
-            uint8_t column = 0;
-
-            for (auto& field : row) {
-                switch (column) {
-                case 1: player_id = stoull(field, nullptr, 10); break;
-                case 2: tag = field; break;
-                }
-                column++;
-            }
+        while (in.read_row(player_id, tag)) {
             insert_player_to_tag(player_id, tag);
         }
     }

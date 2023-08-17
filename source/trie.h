@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <cctype>
-#include "parser.h"
+#include "csv.h"
 
 #define ALPHABET_SIZE 26 + 5  // 26 letters plus 5 special characters
 
@@ -100,28 +100,14 @@ public:
      * @param csv_filename The path to the CSV file containing the FIFA players data.
      */
     void from_csv(std::string csv_filename) {
-        std::ifstream csv_file(csv_filename);
-        if (!csv_file) {
-            std::cout << "[X] file " << csv_filename
-                << " was not loaded." << std::endl;
-        }
-        csv_file.ignore(50, '\n');  // ignore header
+        io::CSVReader<2, io::trim_chars<' '>, io::double_quote_escape<',', '\"'> > in(csv_filename);
+        std::string player_name;
+        uint32_t player_id;
 
-        csv::CsvParser parser(csv_file);
+        in.read_header(io::ignore_extra_column, "sofifa_id", "name");
 
-        for (auto& row : parser) {
-            std::string player_name;
-            uint32_t player_id;
-            uint8_t column = 0;
-
-            for (auto& field : row) {
-                switch (column) {
-                case 0: player_id = stoull(field, nullptr, 10); break;
-                case 1: player_name = field; break;
-                }
-                column++;
-            }
-            this->insert(player_name, player_id);
+        while (in.read_row(player_id, player_name)) {
+            insert(player_name, player_id);
         }
     }
 

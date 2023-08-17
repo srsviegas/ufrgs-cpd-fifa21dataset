@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include "parser.h"
+#include "csv.h"
 #include "hashmap.h"
 
 struct Player {
@@ -25,7 +25,7 @@ private:
      * @param key The key for which to calculate the hash value (32-bit uint).
      * @return The calculated hash value (16-bit uint).
      */
-    uint16_t hash(uint32_t key) {
+    uint32_t hash(uint32_t key) {
         return key % table_size;
     }
 
@@ -63,27 +63,14 @@ public:
      * @param csv_filename The path to the CSV file containing the FIFA players data.
      */
     void from_csv(std::string csv_filename) {
-        std::ifstream csv_file(csv_filename);
-        if (!csv_file) {
-            std::cout << "[X] file " << csv_filename
-                << " was not loaded." << std::endl;
-        }
-        csv_file.ignore(50, '\n');  // ignore header
+        io::CSVReader<3, io::trim_chars<' '>, io::double_quote_escape<',', '\"'> > in(csv_filename);
+        Player player;
+        std::string positions;
 
-        csv::CsvParser parser(csv_file);
+        in.read_header(io::ignore_extra_column, "sofifa_id", "name", "player_positions");
 
-        for (auto& row : parser) {
-            Player player;
-            uint8_t column = 0;
-
-            for (auto& field : row) {
-                switch (column) {
-                case 0: player.id = stoull(field, nullptr, 10); break;
-                case 1: player.name = field; break;
-                case 2: player.positions = format_positions(field); break;
-                }
-                column++;
-            }
+        while (in.read_row(player.id, player.name, positions)) {
+            player.positions = format_positions(positions);
             insert(player.id, player);
         }
     }

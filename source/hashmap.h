@@ -51,6 +51,11 @@ public:
         return nullptr;
     }
 
+    /**
+     * Calculates the occupancy ratio of the hash table.
+     *
+     * @return The occupancy ratio as a floating-point value between 0 and 1.
+     */
     float get_occupancy() {
         uint32_t occupied = 0;
         for (uint32_t i = 0; i < table_size; i++) {

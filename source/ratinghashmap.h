@@ -31,13 +31,26 @@ private:
         return key % table_size;
     }
 
-    bool equal(User item, uint32_t key) {
-        return item.id == key;
+    /**
+     * Checks if the ID of a User object corresponds to a given key.
+     *
+     * @param user The User object to compare.
+     * @param key The key (ID) to compare against.
+     * @return True if the ID of the User object is equal to the key, false otherwise.
+     */
+    bool equal(User user, uint32_t key) {
+        return user.id == key;
     }
 
 public:
     using HashMap<User>::HashMap;
 
+    /**
+     * Retrieves the top 20 ratings from a user's ratings.
+     *
+     * @param user_id The ID of the user whose ratings are to be retrieved.
+     * @return A vector containing the top 20 ratings from the user.
+     */
     std::vector<Rating> top20_from_user(uint32_t user_id) {
         User* user_ptr = search(user_id);
         if (!user_ptr) {

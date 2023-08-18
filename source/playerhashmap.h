@@ -17,7 +17,6 @@ struct Player {
     uint32_t rating_count = 0;
 };
 
-
 class PlayerHashMap : public HashMap<Player> {
 private:
     /**
@@ -30,14 +29,20 @@ private:
         return key % table_size;
     }
 
-    std::vector<std::string> format_positions(std::string s) {
+    /**
+     * Formats a string of comma-separated positions into a vector of strings.
+     *
+     * @param string The input string containing comma-separated positions.
+     * @return A vector of strings containing the formatted positions.
+     */
+    std::vector<std::string> format_positions(std::string string) {
         std::vector<std::string> positions;
-        std::stringstream ss(s);
+        std::stringstream ss(string);
         std::string token;
 
         // Remove quotation marks
-        if (s[0] == '"' && s[s.size() - 1] == '"') {
-            s = s.substr(1, s.size() - 2);
+        if (string[0] == '"' && string[string.size() - 1] == '"') {
+            string = string.substr(1, string.size() - 2);
         }
 
         while (std::getline(ss, token, ',')) {
@@ -51,6 +56,13 @@ private:
         return positions;
     }
 
+    /**
+     * Checks if the ID of a Player object corresponds to a given key.
+     *
+     * @param item The Player object to compare.
+     * @param key The key (ID) to compare against.
+     * @return True if the ID of the Player object is equal to the key, false otherwise.
+     */
     bool equal(Player item, uint32_t key) {
         return item.id == key;
     }
@@ -76,6 +88,11 @@ public:
         }
     }
 
+    /**
+     * Loads ratings data into player global ratings and ratings count.
+     *
+     * @param ratings The RatingHashMap containing user ratings data.
+     */
     void load_ratings(RatingHashMap ratings) {
         for (uint32_t i = 0; i < ratings.table_size; i++) {
             for (auto& user : ratings.table[i]) {

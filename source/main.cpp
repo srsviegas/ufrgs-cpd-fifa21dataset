@@ -39,6 +39,9 @@ int main() {
  * Builds the necessary data structures for console mode by reading data from CSV files.
  *
  * @param player_names A reference to the PlayerNameTrie object.
+ * @param player A reference to the PlayerHashMap object.
+ * @param tags A reference to the TagHashMap object.
+ * @param ratings A reference to the RatingHashMap object.
  */
 void build_structures(
     PlayerNameTrie& player_names,
@@ -101,6 +104,10 @@ void build_structures(
  *   - top<n> <position>
  *   - tags <list of tags>
  *   - exit
+ * @param player_names The PlayerNameTrie object, containing the player names with their user ID`s.
+ * @param player The PlayerHashMap object, containing player information.
+ * @param tags The TagHashMap object, containing the tags and the IDs of the players that have them.
+ * @param ratings The RatingHashMap object, containing the ratings given by each user.
  */
 void start_console(
     PlayerNameTrie player_names,
@@ -120,6 +127,18 @@ void start_console(
         std::getline(std::cin, command);
         command = parse_command(command, arguments);
 
+        if (command.empty()) {
+            std::cout << "[X] No command was provided.\n";
+            continue;
+        }
+        else if (arguments.empty()) {
+            std::cout << "[X] No arguments were provided.\n";
+            if (command == "exit") {
+                return;
+            }
+            continue;
+        }
+
         if (command == "player") {
             std::cout << "sofifa_id,name,player_positions,rating,count \n";
             for (auto& id : player_names.search(arguments[0])) {
@@ -128,8 +147,7 @@ void start_console(
                 for (auto& position : player.positions) {
                     std::cout << position << " ";
                 }
-                std::cout << "\"" << static_cast<double>(player.global_rating)
-                    / static_cast<double>(player.rating_count) << ","
+                std::cout << player.global_rating << ","
                     << player.rating_count << std::endl;
             }
         }
@@ -152,10 +170,12 @@ void start_console(
                 for (auto& position : player.positions) {
                     std::cout << position << " ";
                 }
-                std::cout << "\"" << static_cast<double>(player.global_rating)
-                    / static_cast<double>(player.rating_count) << ","
+                std::cout << "\"" << player.global_rating << ","
                     << player.rating_count << std::endl;
             }
+        }
+        else {
+            std::cout << "[X] Invalid command.\n";
         }
     }
 }

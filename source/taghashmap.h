@@ -31,8 +31,15 @@ private:
         return hash_key;
     }
 
-    bool equal(TagVector item, std::string key) {
-        return item.name == key;
+    /**
+     * Checks if the name of a TagVector object corresponds to a given key.
+     *
+     * @param tag The TagVector object to compare.
+     * @param key The key (tag name) to compare against.
+     * @return True if the name of the TagVector object is equal to the key, false otherwise.
+     */
+    bool equal(TagVector tag, std::string key) {
+        return tag.name == key;
     }
 
 public:

@@ -6,12 +6,18 @@
 #include <string>
 #include "csv.h"
 #include "hashmap.h"
+#include "sort.cpp"
 
 #include <algorithm>
 
 struct Rating {
     uint32_t player_id;
     float score;
+
+    bool operator<(const Rating& other) const {
+        return score < other.score
+            || (score == other.score && player_id > other.player_id);
+    }
 };
 
 struct User {
@@ -59,15 +65,12 @@ public:
         }
 
         // Sort the ratings vector in descending order
-        //sort_descending(user_ptr->ratings);
-        std::sort(user_ptr->ratings.begin(), user_ptr->ratings.end(),
-            [](const Rating& a, const Rating& b) {
-                return a.score > b.score;
-            });
+        sort_descending(user_ptr->ratings);
 
         // Return the first 20 elements of the vector
         auto start = user_ptr->ratings.begin();
-        std::vector<Rating> ratings(start, start + 20);
+        auto end = start + std::min<size_t>(20, user_ptr->ratings.size());
+        std::vector<Rating> ratings(start, end);
         return ratings;
     }
 

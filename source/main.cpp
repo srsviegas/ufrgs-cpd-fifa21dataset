@@ -2,6 +2,7 @@
 #include <time.h>
 #include <sstream>
 #include <string>
+#include <iomanip>
 #include "trie.h"
 #include "hashmap.h"
 #include "playerhashmap.h"
@@ -22,6 +23,11 @@ void start_console(
 
 std::string parse_command(std::string line, std::vector<std::string>& arguments);
 
+template <typename T>
+void printw(T object, size_t width);
+
+std::string positions_to_str(std::vector<std::string> positions);
+
 int main() {
     PlayerNameTrie player_names;
     PlayerHashMap players(12007);
@@ -34,6 +40,7 @@ int main() {
     return 0;
 }
 
+const std::string line(70, '=');
 
 /**
  * Builds the necessary data structures for console mode by reading data from CSV files.
@@ -49,9 +56,9 @@ void build_structures(
     TagHashMap& tags,
     RatingHashMap& ratings
 ) {
-    std::cout << "\n================================================================\n"
+    std::cout << "\n" << line << "\n"
         << "Reading CSV Files And Building Data Structures\n"
-        << "================================================================\n";
+        << line << "\n";
 
     clock_t start = clock();
 
@@ -115,9 +122,9 @@ void start_console(
     TagHashMap tags,
     RatingHashMap ratings
 ) {
-    std::cout << "\n================================================================\n"
+    std::cout << "\n" << line << "\n"
         << "Starting Console Mode\n"
-        << "================================================================\n";
+        << line << "\n";
 
     while (true) {
         std::string command;
@@ -139,44 +146,66 @@ void start_console(
             continue;
         }
 
+        std::cout << "\n";
+
         if (command == "player") {
-            std::cout << "sofifa_id,name,player_positions,rating,count \n";
+            const std::vector<std::string> headers = { "sofifa_id", "name", "player_positions", "rating", "count" };
+            const std::vector<size_t> w = { 12, 50, 20, 10, 10 };
+            for (size_t i = 0; i < headers.size(); i++) {
+                printw(headers[i], w[i]);
+            }
+            std::cout << "\n";
             for (auto& id : player_names.search(arguments[0])) {
                 Player player = *(players.search(id));
-                std::cout << player.id << "," << player.name << ",\"";
-                for (auto& position : player.positions) {
-                    std::cout << position << " ";
-                }
-                std::cout << player.global_rating << ","
-                    << player.rating_count << std::endl;
+                std::string positions = positions_to_str(player.positions);
+                printw(player.id, w[0]);
+                printw(player.name, w[1]);
+                printw(positions, w[2]);
+                printw(player.global_rating, w[3]);
+                printw(player.rating_count, w[4]);
+                std::cout << "\n";
             }
         }
         else if (command == "user") {
-            std::cout << "sofifa_id,name,global_rating,count,rating \n";
+            const std::vector<std::string> headers = { "sofifa_id", "name", "global_rating", "count", "rating" };
+            const std::vector<size_t> w = { 12, 50, 18, 10, 10 };
+            for (size_t i = 0; i < headers.size(); i++) {
+                printw(headers[i], w[i]);
+            }
+            std::cout << "\n";
             for (auto& rating : ratings.top20_from_user(std::stoull(arguments[0]))) {
                 Player player = *(players.search(rating.player_id));
-                std::cout << player.id << ","
-                    << player.name << ","
-                    << player.global_rating << ","
-                    << player.rating_count << ","
-                    << rating.score << std::endl;
+                printw(player.id, w[0]);
+                printw(player.name, w[1]);
+                printw(player.global_rating, w[2]);
+                printw(player.rating_count, w[3]);
+                printw(rating.score, w[4]);
+                std::cout << "\n";
             }
         }
         else if (command == "tags") {
-            std::cout << "sofifa_id,name,player_positions,rating,count \n";
+            const std::vector<std::string> headers = { "sofifa_id", "name", "player_positions", "rating", "count" };
+            const std::vector<size_t> w = { 12, 50, 20, 10, 10 };
+            for (size_t i = 0; i < headers.size(); i++) {
+                printw(headers[i], w[i]);
+            }
+            std::cout << "\n";
             for (auto& id : tags.search_tags(arguments)) {
                 Player player = *(players.search(id));
-                std::cout << player.id << "," << player.name << ",\"";
-                for (auto& position : player.positions) {
-                    std::cout << position << " ";
-                }
-                std::cout << "\"" << player.global_rating << ","
-                    << player.rating_count << std::endl;
+                std::string positions = positions_to_str(player.positions);
+                printw(player.id, w[0]);
+                printw(player.name, w[1]);
+                printw(positions, w[2]);
+                printw(player.global_rating, w[3]);
+                printw(player.rating_count, w[4]);
+                std::cout << "\n";
             }
         }
         else {
             std::cout << "[X] Invalid command.\n";
         }
+
+        std::cout << "\n";
     }
 }
 
@@ -206,4 +235,22 @@ std::string parse_command(std::string line, std::vector<std::string>& arguments)
     }
 
     return command;
+}
+
+template <typename T>
+void printw(T object, size_t width) {
+    std::cout << std::left << std::setw(width) << object;
+}
+
+std::string positions_to_str(std::vector<std::string> positions) {
+    std::stringstream ss;
+    ss << "\"";
+    for (size_t i = 0; i < positions.size(); ++i) {
+        ss << positions[i];
+        if (i < positions.size() - 1) {
+            ss << ", ";
+        }
+    }
+    ss << "\"";
+    return ss.str();
 }

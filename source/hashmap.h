@@ -6,14 +6,12 @@
 
 template <class Item, class Key = uint32_t>
 class HashMap {
-protected:
-    uint32_t table_size;
-
 private:
     virtual uint32_t hash(Key key) = 0;
     virtual bool equal(Item item, Key key) = 0;
 
 public:
+    uint32_t table_size;
     std::vector<Item>* table;
 
     /**

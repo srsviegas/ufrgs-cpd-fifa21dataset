@@ -7,13 +7,14 @@
 #include <string>
 #include "csv.h"
 #include "hashmap.h"
+#include "ratinghashmap.h"
 
 struct Player {
     uint32_t id;
     std::string name;
     std::vector<std::string> positions;
-    uint64_t rating_sum;
-    uint32_t rating_count;
+    double global_rating = 0;
+    uint32_t rating_count = 0;
 };
 
 
@@ -72,6 +73,18 @@ public:
         while (in.read_row(player.id, player.name, positions)) {
             player.positions = format_positions(positions);
             insert(player.id, player);
+        }
+    }
+
+    void load_ratings(RatingHashMap ratings) {
+        for (uint32_t i = 0; i < ratings.table_size; i++) {
+            for (auto& user : ratings.table[i]) {
+                for (auto& rating : user.ratings) {
+                    Player* player = search(rating.player_id);
+                    player->global_rating += (static_cast<double>(rating.score) - player->global_rating)
+                        / static_cast<double>(++player->rating_count);
+                }
+            }
         }
     }
 };

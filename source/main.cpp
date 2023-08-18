@@ -74,10 +74,16 @@ void build_structures(
     std::cout << "    Occupancy rate of " << ratings.get_occupancy() * 100
         << "%." << std::endl;
 
+    players.load_ratings(ratings);
+    clock_t end_ratings = clock();
+    std::cout << "[-] Ratings loaded into the Players Hash Map in "
+        << double(end_ratings - end_rhash) / double(CLOCKS_PER_SEC)
+        << " seconds." << std::endl;
+
     tags.from_csv("data/tags.csv");
     clock_t end_thash = clock();
     std::cout << "[-] Tag Hash Map initialization completed in "
-        << double(end_thash - end_rhash) / double(CLOCKS_PER_SEC)
+        << double(end_thash - end_ratings) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
     std::cout << "    Occupancy rate of " << tags.get_occupancy() * 100
         << "%." << std::endl;
@@ -115,33 +121,40 @@ void start_console(
         command = parse_command(command, arguments);
 
         if (command == "player") {
+            std::cout << "sofifa_id,name,player_positions,rating,count \n";
             for (auto& id : player_names.search(arguments[0])) {
                 Player player = *(players.search(id));
-                std::cout << player.id << "," << player.name << ",";
+                std::cout << player.id << "," << player.name << ",\"";
                 for (auto& position : player.positions) {
                     std::cout << position << " ";
                 }
-                std::cout << std::endl;
+                std::cout << "\"" << static_cast<double>(player.global_rating)
+                    / static_cast<double>(player.rating_count) << ","
+                    << player.rating_count << std::endl;
             }
         }
         else if (command == "user") {
+            std::cout << "sofifa_id,name,global_rating,count,rating \n";
             for (auto& rating : ratings.top20_from_user(std::stoull(arguments[0]))) {
                 Player player = *(players.search(rating.player_id));
                 std::cout << player.id << ","
                     << player.name << ","
-                    << "global_rating" << ","
-                    << "count" << ","
+                    << player.global_rating << ","
+                    << player.rating_count << ","
                     << rating.score << std::endl;
             }
         }
         else if (command == "tags") {
+            std::cout << "sofifa_id,name,player_positions,rating,count \n";
             for (auto& id : tags.search_tags(arguments)) {
                 Player player = *(players.search(id));
-                std::cout << player.id << "," << player.name << ",";
+                std::cout << player.id << "," << player.name << ",\"";
                 for (auto& position : player.positions) {
                     std::cout << position << " ";
                 }
-                std::cout << std::endl;
+                std::cout << "\"" << static_cast<double>(player.global_rating)
+                    / static_cast<double>(player.rating_count) << ","
+                    << player.rating_count << std::endl;
             }
         }
     }

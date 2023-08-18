@@ -1,23 +1,35 @@
 #include <iostream>
 #include <time.h>
 #include <sstream>
-#include "parser.h"
+#include <string>
 #include "trie.h"
 #include "hashmap.h"
 #include "playerhashmap.h"
 #include "taghashmap.h"
+#include "ratinghashmap.h"
 
-void build_structures(PlayerNameTrie& player_names, PlayerHashMap& players, TagHashMap& tags);
-void start_console(PlayerNameTrie player_names, PlayerHashMap players, TagHashMap tags);
+void build_structures(
+    PlayerNameTrie& player_names,
+    PlayerHashMap& players,
+    TagHashMap& tags,
+    RatingHashMap& ratings);
+
+void start_console(
+    PlayerNameTrie player_names,
+    PlayerHashMap players,
+    TagHashMap tags,
+    RatingHashMap ratings);
+
 std::string parse_command(std::string line, std::vector<std::string>& arguments);
 
 int main() {
     PlayerNameTrie player_names;
     PlayerHashMap players(12007);
     TagHashMap tags(809);
+    RatingHashMap ratings(180043);
 
-    build_structures(player_names, players, tags);
-    start_console(player_names, players, tags);
+    build_structures(player_names, players, tags, ratings);
+    start_console(player_names, players, tags, ratings);
 
     return 0;
 }
@@ -31,7 +43,8 @@ int main() {
 void build_structures(
     PlayerNameTrie& player_names,
     PlayerHashMap& players,
-    TagHashMap& tags
+    TagHashMap& tags,
+    RatingHashMap& ratings
 ) {
     std::cout << "\n================================================================\n"
         << "Reading CSV Files And Building Data Structures\n"
@@ -53,10 +66,18 @@ void build_structures(
     std::cout << "    Occupancy rate of " << players.get_occupancy() * 100
         << "%." << std::endl;
 
+    ratings.from_csv("data/rating.csv");
+    clock_t end_rhash = clock();
+    std::cout << "[-] Ratings Hash Map initialization completed in "
+        << double(end_rhash - end_phash) / double(CLOCKS_PER_SEC)
+        << " seconds." << std::endl;
+    std::cout << "    Occupancy rate of " << ratings.get_occupancy() * 100
+        << "%." << std::endl;
+
     tags.from_csv("data/tags.csv");
     clock_t end_thash = clock();
     std::cout << "[-] Tag Hash Map initialization completed in "
-        << double(end_thash - end_phash) / double(CLOCKS_PER_SEC)
+        << double(end_thash - end_rhash) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
     std::cout << "    Occupancy rate of " << tags.get_occupancy() * 100
         << "%." << std::endl;
@@ -78,7 +99,8 @@ void build_structures(
 void start_console(
     PlayerNameTrie player_names,
     PlayerHashMap players,
-    TagHashMap tags
+    TagHashMap tags,
+    RatingHashMap ratings
 ) {
     std::cout << "\n================================================================\n"
         << "Starting Console Mode\n"
@@ -102,7 +124,17 @@ void start_console(
                 std::cout << std::endl;
             }
         }
-        else if (command == "tag") {
+        else if (command == "user") {
+            for (auto& rating : ratings.top20_from_user(std::stoull(arguments[0]))) {
+                Player player = *(players.search(rating.player_id));
+                std::cout << player.id << ","
+                    << player.name << ","
+                    << "global_rating" << ","
+                    << "count" << ","
+                    << rating.score << std::endl;
+            }
+        }
+        else if (command == "tags") {
             for (auto& id : tags.search_tags(arguments)) {
                 Player player = *(players.search(id));
                 std::cout << player.id << "," << player.name << ",";
@@ -133,7 +165,7 @@ std::string parse_command(std::string line, std::vector<std::string>& arguments)
     }
 
     std::string argument;
-    while (std::getline(ss, argument, '"')) {
+    while (std::getline(ss, argument, '\'')) {
         // Ignore if argument is empty
         if (argument != "" && argument != " ") {
             arguments.push_back(argument);

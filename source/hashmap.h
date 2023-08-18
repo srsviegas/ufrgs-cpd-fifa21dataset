@@ -7,10 +7,10 @@
 template <class Item, class Key = uint32_t>
 class HashMap {
 protected:
-    uint16_t table_size;
+    uint32_t table_size;
 
 private:
-    virtual uint16_t hash(Key key) = 0;
+    virtual uint32_t hash(Key key) = 0;
     virtual bool equal(Item item, Key key) = 0;
 
 public:
@@ -21,7 +21,7 @@ public:
      *
      * @param tsize The initial size of the hash table.
      */
-    HashMap(uint16_t tsize) {
+    HashMap(uint32_t tsize) {
         table_size = tsize;
         table = new std::vector<Item>[table_size];
     }
@@ -33,7 +33,7 @@ public:
      * @param item The item to insert into the hash map.
      */
     void insert(Key key, Item item) {
-        uint16_t hash_value = hash(key);
+        uint32_t hash_value = hash(key);
         table[hash_value].push_back(item);
     }
 
@@ -44,7 +44,7 @@ public:
      * @return A pointer to the found item, or nullptr if not found.
      */
     Item* search(Key key) {
-        uint16_t hash_value = hash(key);
+        uint32_t hash_value = hash(key);
         for (auto& item : table[hash_value]) {
             if (equal(item, key)) {
                 return &item;
@@ -54,8 +54,8 @@ public:
     }
 
     float get_occupancy() {
-        int occupied = 0;
-        for (int i = 0; i < table_size; i++) {
+        uint32_t occupied = 0;
+        for (uint32_t i = 0; i < table_size; i++) {
             if (!(table[i].empty())) {
                 occupied++;
             }

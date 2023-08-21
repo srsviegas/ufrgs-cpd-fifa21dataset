@@ -90,14 +90,13 @@ public:
 
         // Find all tag vectors
         size_t i = 0;
-        for (auto& tag : tags) {
-            try {
-                vectors.push_back(search(tag)->vector);
-            }
-            catch (...) {
+        for (auto& tag_name : tags) {
+            TagVector* tag = search(tag_name);
+            if (!tag) {
                 // If a tag is not found, return an empty vector
                 return std::vector<uint32_t>();
             }
+            vectors.push_back(tag->vector);
             i++;
         }
 

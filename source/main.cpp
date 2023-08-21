@@ -185,7 +185,7 @@ void start_console(
         }
         else if (command == "tags") {
             const std::vector<std::string> headers = { "sofifa_id", "name", "player_positions", "rating", "count" };
-            const std::vector<size_t> w = { 12, 50, 20, 10, 10 };
+            const std::vector<size_t> w = { 12, 50, 19, 10, 10 };
             for (size_t i = 0; i < headers.size(); i++) {
                 printw(headers[i], w[i]);
             }

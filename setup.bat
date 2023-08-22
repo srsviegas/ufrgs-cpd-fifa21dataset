@@ -1,2 +1,2 @@
-g++ -O3 -c source/main.cpp source/sort.cpp -static
-g++ main.o sort.o -o main -static
+g++ -O3 -c source/main.cpp -static
+g++ main.o -o main -static

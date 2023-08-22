@@ -8,18 +8,21 @@
 #include "playerhashmap.h"
 #include "taghashmap.h"
 #include "ratinghashmap.h"
+#include "positionhashmap.h"
 
 void build_structures(
     PlayerNameTrie& player_names,
     PlayerHashMap& players,
     TagHashMap& tags,
-    RatingHashMap& ratings);
+    RatingHashMap& ratings,
+    PositionHashMap& positions);
 
 void start_console(
     PlayerNameTrie player_names,
     PlayerHashMap players,
     TagHashMap tags,
-    RatingHashMap ratings);
+    RatingHashMap ratings,
+    PositionHashMap positions);
 
 std::string parse_command(std::string line, std::vector<std::string>& arguments);
 
@@ -33,14 +36,15 @@ int main() {
     PlayerHashMap players(12007);
     TagHashMap tags(809);
     RatingHashMap ratings(180043);
+    PositionHashMap positions(41);
 
-    build_structures(player_names, players, tags, ratings);
-    start_console(player_names, players, tags, ratings);
+    build_structures(player_names, players, tags, ratings, positions);
+    start_console(player_names, players, tags, ratings, positions);
 
     return 0;
 }
 
-const std::string line(70, '=');
+const std::string line(100, '=');
 
 /**
  * Builds the necessary data structures for console mode by reading data from CSV files.
@@ -49,12 +53,14 @@ const std::string line(70, '=');
  * @param player A reference to the PlayerHashMap object.
  * @param tags A reference to the TagHashMap object.
  * @param ratings A reference to the RatingHashMap object.
+ * @param positions A reference to the PositionsHashMap object.
  */
 void build_structures(
     PlayerNameTrie& player_names,
     PlayerHashMap& players,
     TagHashMap& tags,
-    RatingHashMap& ratings
+    RatingHashMap& ratings,
+    PositionHashMap& positions
 ) {
     std::cout << "\n" << line << "\n"
         << "Reading CSV Files And Building Data Structures\n"
@@ -90,10 +96,18 @@ void build_structures(
         << double(end_ratings - end_rhash) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
 
+    positions.load_players(players);
+    clock_t end_poshash = clock();
+    std::cout << "[-] Players loaded into the Positions Hash Map in "
+        << double(end_poshash - end_ratings) / double(CLOCKS_PER_SEC)
+        << " seconds." << std::endl;
+    std::cout << "    Occupancy rate of " << positions.get_occupancy() * 100
+        << "%." << std::endl;
+
     tags.from_csv("data/tags.csv");
     clock_t end_thash = clock();
     std::cout << "[-] Tag Hash Map initialization completed in "
-        << double(end_thash - end_ratings) / double(CLOCKS_PER_SEC)
+        << double(end_thash - end_poshash) / double(CLOCKS_PER_SEC)
         << " seconds." << std::endl;
     std::cout << "    Occupancy rate of " << tags.get_occupancy() * 100
         << "%." << std::endl;
@@ -115,12 +129,14 @@ void build_structures(
  * @param player The PlayerHashMap object, containing player information.
  * @param tags The TagHashMap object, containing the tags and the IDs of the players that have them.
  * @param ratings The RatingHashMap object, containing the ratings given by each user.
+ * @param positions The PositionsHashMap object, containing the positions and players that have them.
  */
 void start_console(
     PlayerNameTrie player_names,
     PlayerHashMap players,
     TagHashMap tags,
-    RatingHashMap ratings
+    RatingHashMap ratings,
+    PositionHashMap positions
 ) {
     std::cout << "\n" << line << "\n"
         << "Starting Console Mode\n"
@@ -157,10 +173,10 @@ void start_console(
             std::cout << "\n";
             for (auto& id : player_names.search(arguments[0])) {
                 Player player = *(players.search(id));
-                std::string positions = positions_to_str(player.positions);
+                std::string pos = positions_to_str(player.positions);
                 printw(player.id, w[0]);
                 printw(player.name, w[1]);
-                printw(positions, w[2]);
+                printw(pos, w[2]);
                 printw(player.global_rating, w[3]);
                 printw(player.rating_count, w[4]);
                 std::cout << "\n";
@@ -183,6 +199,27 @@ void start_console(
                 std::cout << "\n";
             }
         }
+        else if (command.rfind("top", 0) == 0) {
+            size_t n = stoull(command.substr(3));
+            const std::vector<std::string> headers = { "#", "sofifa_id", "name", "player_positions", "rating", "count" };
+            const std::vector<size_t> w = { 5, 12, 50, 19, 10, 10 };
+            for (size_t i = 0; i < headers.size(); i++) {
+                printw(headers[i], w[i]);
+            }
+            std::cout << "\n";
+            size_t i = 1;
+            for (auto& id : positions.topn(n, arguments[0])) {
+                Player player = *(players.search(id));
+                std::string pos = positions_to_str(player.positions);
+                printw(i++, w[0]);
+                printw(player.id, w[1]);
+                printw(player.name, w[2]);
+                printw(pos, w[3]);
+                printw(player.global_rating, w[4]);
+                printw(player.rating_count, w[5]);
+                std::cout << "\n";
+            }
+        }
         else if (command == "tags") {
             const std::vector<std::string> headers = { "sofifa_id", "name", "player_positions", "rating", "count" };
             const std::vector<size_t> w = { 12, 50, 19, 10, 10 };
@@ -192,10 +229,10 @@ void start_console(
             std::cout << "\n";
             for (auto& id : tags.search_tags(arguments)) {
                 Player player = *(players.search(id));
-                std::string positions = positions_to_str(player.positions);
+                std::string pos = positions_to_str(player.positions);
                 printw(player.id, w[0]);
                 printw(player.name, w[1]);
-                printw(positions, w[2]);
+                printw(pos, w[2]);
                 printw(player.global_rating, w[3]);
                 printw(player.rating_count, w[4]);
                 std::cout << "\n";

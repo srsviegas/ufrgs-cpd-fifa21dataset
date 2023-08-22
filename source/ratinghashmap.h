@@ -6,7 +6,6 @@
 #include <string>
 #include "csv.h"
 #include "hashmap.h"
-#include "sort.cpp"
 
 #include <algorithm>
 
@@ -46,6 +45,24 @@ private:
      */
     bool equal(User user, uint32_t key) {
         return user.id == key;
+    }
+
+    /**
+     * Sorts a vector in descending order using insertion sort.
+     *
+     * @param vector The vector to be sorted.
+     */
+    void sort_descending(std::vector<Rating>& vector) {
+        int i, j;
+        for (j = 1; j < vector.size(); j++) {
+            Rating key = vector[j];
+            i = j - 1;
+            while (i >= 0 && vector[i] < key) {
+                vector[i + 1] = vector[i];
+                i--;
+            }
+            vector[i + 1] = key;
+        }
     }
 
 public:

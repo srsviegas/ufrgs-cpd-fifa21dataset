@@ -155,10 +155,10 @@ void start_console(
             continue;
         }
         else if (arguments.empty()) {
-            std::cout << "[X] No arguments were provided.\n";
             if (command == "exit") {
                 return;
             }
+            std::cout << "[X] No arguments were provided.\n";
             continue;
         }
 
